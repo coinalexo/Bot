@@ -1,19 +1,18 @@
 import sqlite3
 import base64
-import base58
-from solders.keypair import Keypair
 
 con = sqlite3.connect("bot.db")
 cur = con.cursor()
 
-for user_id, secret in cur.execute("SELECT user_id, wallet_secret FROM users"):
-    raw = base64.b64decode(secret)
-    kp = Keypair.from_bytes(raw)
+print("\n=== ALL WALLETS ===\n")
 
-    print("\n==============================")
-    print("User ID:", user_id)
-    print("Public key:", kp.pubkey())
-    print("Base58 private key:")
-    print(base58.b58encode(raw).decode())
+for row in cur.execute("SELECT user_id, wallet_pub, wallet_secret FROM users"):
+    user_id, pub, secret = row
+
+    print(f"User ID: {user_id}")
+    print(f"Address: {pub}")
+    print(f"Private key (base64): {secret}")
+    print(f"Private key (decoded): {base64.b64decode(secret)}")
+    print("-" * 50)
 
 con.close()
