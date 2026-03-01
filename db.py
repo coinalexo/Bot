@@ -2,7 +2,7 @@ import sqlite3
 import json
 import os
 
-DB_NAME = "/data/bot.db"
+DB_NAME = "bot.db"
 
 def init_db():
     con = sqlite3.connect(DB_NAME)
@@ -61,4 +61,5 @@ def update_balance(user_id, sol=None, tokens=None):
 
     con.commit()
     con.close()
+
 
