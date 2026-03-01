@@ -1,0 +1,6 @@
+aiogram==3.0.0b7
+aiohttp==3.8.5
+solana==0.29.2
+solders==0.14.0
+
+
