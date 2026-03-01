@@ -24,7 +24,8 @@ async def safe_delete(msg: Message):
 
 # ========= START =========
 @router.message(lambda m: m.text == "/start")
-async def start(msg: Message, bot):
+async def start(msg: Message):
+    bot = msg.bot
     uid = msg.from_user.id
     reset_state(uid)
 
@@ -37,8 +38,9 @@ async def start(msg: Message, bot):
 
 # ========= BALANCE =========
 @router.callback_query(lambda c: c.data == "balance")
-async def balance_cb(cb: CallbackQuery, bot):
-    await cb.answer()
+async def balance_cb(cb: CallbackQuery):
+    await cb.answer(cache_time=3)
+    bot = cb.bot
     uid = cb.from_user.id
     reset_state(uid)
 
@@ -47,8 +49,9 @@ async def balance_cb(cb: CallbackQuery, bot):
 
 # ========= DEPOSIT =========
 @router.callback_query(lambda c: c.data == "deposit")
-async def deposit_cb(cb: CallbackQuery, bot):
-    await cb.answer()
+async def deposit_cb(cb: CallbackQuery):
+    await cb.answer(cache_time=3)
+    bot = cb.bot
     uid = cb.from_user.id
     reset_state(uid)
 
@@ -57,8 +60,9 @@ async def deposit_cb(cb: CallbackQuery, bot):
 
 # ========= WITHDRAW =========
 @router.callback_query(lambda c: c.data == "withdraw")
-async def withdraw_cb(cb: CallbackQuery, bot):
-    await cb.answer()
+async def withdraw_cb(cb: CallbackQuery):
+    await cb.answer(cache_time=3)
+    bot = cb.bot
     uid = cb.from_user.id
 
     if uid in pending_withdraw:
@@ -69,7 +73,8 @@ async def withdraw_cb(cb: CallbackQuery, bot):
     await update_menu(bot, uid, "📤 Send withdrawal address:")
 
 @router.message()
-async def withdraw_flow(msg: Message, bot):
+async def withdraw_flow(msg: Message):
+    bot = msg.bot
     uid = msg.from_user.id
 
     if uid not in pending_withdraw:
@@ -78,7 +83,7 @@ async def withdraw_flow(msg: Message, bot):
     await safe_delete(msg)
     state = pending_withdraw[uid]
 
-    # STEP 1
+    # STEP 1 — address
     if state["step"] == 1:
         try:
             Pubkey.from_string(msg.text)
@@ -92,7 +97,7 @@ async def withdraw_flow(msg: Message, bot):
         await update_menu(bot, uid, "💰 Enter amount in SOL:")
         return
 
-    # STEP 2
+    # STEP 2 — amount
     try:
         amount = float(msg.text)
     except:
@@ -131,8 +136,10 @@ async def withdraw_flow(msg: Message, bot):
 
 # ========= TOKEN =========
 @router.message(lambda m: 32 <= len(m.text) <= 44 and not m.text.startswith("/"))
-async def set_token(msg: Message, bot):
+async def set_token(msg: Message):
+    bot = msg.bot
     uid = msg.from_user.id
+
     if uid in pending_withdraw:
         return
 
