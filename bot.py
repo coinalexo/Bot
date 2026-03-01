@@ -3,7 +3,6 @@ from aiogram import Bot, Dispatcher
 from handlers import router
 from config import BOT_TOKEN
 from db import init_db   # ✅ ДОБАВИТЬ
-import export_all_wallets
 
 bot = Bot(BOT_TOKEN, parse_mode="HTML")
 dp = Dispatcher()
@@ -17,4 +16,5 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
 
