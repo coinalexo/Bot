@@ -1,4 +1,5 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.exceptions import TelegramBadRequest
 
 menu_messages = {}
 
@@ -22,17 +23,30 @@ def main_menu():
     ])
 
 async def update_menu(bot, user_id: int, text: str):
+    # если уже есть сообщение — пробуем редактировать
     if user_id in menu_messages:
         try:
             await bot.edit_message_text(
                 text,
                 chat_id=user_id,
                 message_id=menu_messages[user_id],
-                reply_markup=main_menu()
+                reply_markup=main_menu(),
+                parse_mode="HTML"
             )
             return
-        except:
+        except TelegramBadRequest as e:
+            # ❗ игнорируем ситуацию "message is not modified"
+            if "message is not modified" in str(e):
+                return
+            # если сообщение удалено — отправим новое
+        except Exception:
             pass
 
-    msg = await bot.send_message(user_id, text, reply_markup=main_menu())
+    # отправляем новое сообщение
+    msg = await bot.send_message(
+        user_id,
+        text,
+        reply_markup=main_menu(),
+        parse_mode="HTML"
+    )
     menu_messages[user_id] = msg.message_id
