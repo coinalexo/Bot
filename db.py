@@ -1,6 +1,5 @@
 import sqlite3
 import json
-import os
 
 DB_NAME = "bot.db"
 
@@ -20,6 +19,58 @@ def init_db():
             wallet_secret TEXT
         )
     """)
+
+    con.commit()
+    con.close()
+
+# ========= USERS =========
+
+def get_user(user_id):
+    con = get_conn()
+    cur = con.cursor()
+
+    cur.execute(
+        "SELECT sol, tokens, wallet_pub, wallet_secret FROM users WHERE user_id=?",
+        (user_id,),
+    )
+    row = cur.fetchone()
+    con.close()
+
+    if not row:
+        return None
+
+    sol, tokens_json, pub, secret = row
+    return {
+        "sol": sol,
+        "tokens": json.loads(tokens_json),
+        "pub": pub,
+        "secret": secret,
+    }
+
+def create_user(user_id, pub, secret):
+    con = get_conn()
+    cur = con.cursor()
+
+    cur.execute(
+        "INSERT INTO users (user_id, wallet_pub, wallet_secret) VALUES (?, ?, ?)",
+        (user_id, pub, secret),
+    )
+
+    con.commit()
+    con.close()
+
+def update_balance(user_id, sol=None, tokens=None):
+    con = get_conn()
+    cur = con.cursor()
+
+    if sol is not None:
+        cur.execute("UPDATE users SET sol=? WHERE user_id=?", (sol, user_id))
+
+    if tokens is not None:
+        cur.execute(
+            "UPDATE users SET tokens=? WHERE user_id=?",
+            (json.dumps(tokens), user_id),
+        )
 
     con.commit()
     con.close()
